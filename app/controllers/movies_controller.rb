@@ -14,23 +14,27 @@ class MoviesController < ApplicationController
 
     @all_ratings = Movie.ratings
 
-    if params[:sort_by] == 'title'
-      @sort_by = :title
-      @movies = Movie.order(:title)
-    elsif params[:sort_by] == 'date'
-      @sort_by = :date
-      @movies = Movie.order(:release_date)
+    session[:ratings] ||= @all_ratings
+
+    @sort_by = params[:sort_by].to_sym if params[:sort_by] == 'title' or params[:sort_by] == 'release_date'
+
+    # storing passed values of :ratings and :sort_by
+    session[:ratings] = params[:ratings].keys if params[:ratings]
+    session[:sort_by] = @sort_by if @sort_by
+
+    @ratings = session[:ratings]
+    @sort_by = session[:sort_by].to_sym if session[:sort_by]
+
+    redirect_to movies_path sort_by: @sort_by, ratings: Hash[@ratings.map {|k| [k,1]}] unless params[:ratings]
+
+
+    if @sort_by
+      @movies = Movie.order(@sort_by.to_sym)
     else
       @movies = Movie.all
     end
 
-    if params[:ratings]
-      @ratings = params[:ratings].keys
-      @movies = @movies.where(rating: @ratings)
-    else
-      @ratings = @all_ratings
-    end
-
+    @movies = @movies.where(rating: @ratings)
   end
 
   def new
