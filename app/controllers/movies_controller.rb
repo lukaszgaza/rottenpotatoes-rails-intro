@@ -27,9 +27,8 @@ class MoviesController < ApplicationController
 
     redirect_to movies_path sort_by: @sort_by, ratings: Hash[@ratings.map {|k| [k,1]}] unless params[:ratings]
 
-
     if @sort_by
-      @movies = Movie.order(@sort_by.to_sym)
+      @movies = Movie.order(@sort_by)
     else
       @movies = Movie.all
     end
